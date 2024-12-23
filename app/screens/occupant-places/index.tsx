@@ -17,10 +17,11 @@ import { occupantPlaceScreenStyles } from "./styles";
 
 const OccupantPlaceScreen = ({ navigation: { goBack } }: any) => {
   const { colors } = useColors();
-  const [selectedOption, setSelectedOption] = useState("");
-  const [active, setActive] = useState("");
+  const [selectedPlaceType, setSelectedPlaceType] = useState("");
+  const [occupantPlaceType, setOccupantPlaceType] = useState("");
   const [currentStage, setCurrentStage] = useState(1);
   const totalStages = 3;
+  const isLastStage = currentStage === 3;
   const {
     btnsWrap,
     pageWrap,
@@ -37,8 +38,8 @@ const OccupantPlaceScreen = ({ navigation: { goBack } }: any) => {
       <PlaceTypeSelectable
         Icon={Icon}
         type={type}
-        isSelected={type == selectedOption}
-        onPress={() => setSelectedOption(type)}
+        isSelected={type == selectedPlaceType}
+        onPress={() => setSelectedPlaceType(type)}
       />
     );
   };
@@ -52,8 +53,8 @@ const OccupantPlaceScreen = ({ navigation: { goBack } }: any) => {
           placeTypeDesc,
           placeTypeImg,
         }}
-        isSelected={active == placeType}
-        onPress={() => setActive(placeType)}
+        isSelected={occupantPlaceType == placeType}
+        onPress={() => setOccupantPlaceType(placeType)}
       />
     );
   };
@@ -87,11 +88,12 @@ const OccupantPlaceScreen = ({ navigation: { goBack } }: any) => {
         );
         break;
 
-        case 3:
+      case 3:
         return (
-          <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
-              <RNText text="Last stage of the process" />
-
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
+            <RNText text="Last stage of the process" />
           </View>
         );
         break;
@@ -103,6 +105,32 @@ const OccupantPlaceScreen = ({ navigation: { goBack } }: any) => {
 
   const backBtnAction = () =>
     currentStage == 1 ? goBack() : setCurrentStage((stage) => stage - 1);
+
+  const onNextPress = () => {
+    if (!isLastStage) {
+      setCurrentStage((stage) => stage + 1);
+    } else {
+      console.log(
+        JSON.stringify(
+          {
+            placeType: selectedPlaceType,
+            occupantSpace: occupantPlaceType,
+          },
+          null,
+          2
+        )
+      );
+    }
+  };
+  const disableBtn = () => {
+    if(currentStage == 1 && selectedPlaceType == ""){
+      return true
+    }
+    if(currentStage == 2 && occupantPlaceType == ""){
+      return true
+    }
+    return false
+  }
 
   return (
     <SafeAreaView style={pageWrap}>
@@ -121,11 +149,12 @@ const OccupantPlaceScreen = ({ navigation: { goBack } }: any) => {
       {stageData()}
 
       <View style={btnsWrap}>
-        <RNButton outline btnText="Save & Exit" style={{flex: 1}} />
+        <RNButton outline  btnText="Save & Exit" style={{ flex: 1 }} />
         <RNButton
-          btnText="Next"
-          onPress={() => setCurrentStage((stage) => stage + 1)}
-          style={{flex: 1}}
+          disabled={disableBtn()}
+          btnText={isLastStage ? "Done" : "Next"}
+          onPress={onNextPress}
+          style={{ flex: 1 }}
         />
       </View>
     </SafeAreaView>
